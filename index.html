@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YPT Advanced Web Studio</title>
+    <!-- Tailwind CSS for UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .subject-card.active { border-color: #ff6b6b; box-shadow: 0 0 15px rgba(255, 107, 107, 0.4); }
+        .heatmap-cell { width: 14px; height: 14px; border-radius: 2px; }
+        /* YPT Theme Colors */
+        .bg-ypt-dark { background-color: #121214; }
+        .bg-ypt-card { background-color: #1a1a1e; }
+    </style>
+</head>
+<body class="bg-ypt-dark text-gray-200 font-sans min-h-screen pb-20">
+
+    <!-- Top Navbar -->
+    <header class="bg-ypt-card p-4 border-b border-gray-800 flex justify-between items-center sticky top-0 z-50">
+        <h1 class="text-xl font-bold text-red-500 tracking-wider"><i class="fa-solid fa-fire mr-2"></i>YPT WEB</h1>
+        <div class="flex items-center gap-4">
+            <span id="dday-display" class="bg-red-950 text-red-400 px-3 py-1 rounded-full text-xs font-semibold border border-red-800">D-Day: Set Goal</span>
+            <span id="global-timer" class="text-lg font-mono text-gray-400">Total: 00:00:00</span>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Wrapper -->
+    <main class="max-w-md mx-auto p-4 space-y-6">
+
+        <!-- CORE FEATURE 1: D-DAY CONFIGURATOR -->
+        <section class="bg-ypt-card p-4 rounded-xl border border-gray-800">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-semibold tracking-wide text-gray-400 uppercase">Target Exam / D-Day</h3>
+                <button onclick="setDDay()" class="text-xs text-red-400 hover:underline">Edit</button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span id="target-exam-name" class="font-medium text-gray-200">No Target Set</span>
+                <span id="target-days-left" class="text-2xl font-black text-red-500">D-0</span>
+            </div>
+        </section>
+
+        <!-- CORE FEATURE 2: SUBJECT TIMERS (The Heart of YPT) -->
+        <section class="space-y-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-semibold tracking-wide text-gray-400 uppercase">Subjects</h3>
+                <button onclick="addSubject()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold transition"><i class="fa-solid fa-plus mr-1"></i> Add</button>
+            </div>
+            
+            <!-- Target for Dynamic Subject Rendering -->
+            <div id="subjects-container" class="space-y-3"></div>
+        </section>
+
+        <!-- CORE FEATURE 3: 10-MINUTE PLANNERS & TO-DOs -->
+        <section class="bg-ypt-card p-4 rounded-xl border border-gray-800 space-y-4">
+            <h3 class="text-sm font-semibold tracking-wide text-gray-400 uppercase">10-Min Daily Planner & Tasks</h3>
+            <div class="flex gap-2">
+                <input type="text" id="todo-input" placeholder="Enter a task to conquer..." class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 text-gray-200">
+                <button onclick="addTodo()" class="bg-gray-850 border border-gray-700 hover:bg-gray-800 text-gray-200 px-4 rounded-lg text-sm font-bold">Add</button>
+            </div>
+            <ul id="todo-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></ul>
+        </section>
+
+        <!-- CORE FEATURE 4: INSIGHTS & HISTORIC HEATMAP -->
+        <section class="bg-ypt-card p-4 rounded-xl border border-gray-800">
+            <h3 class="text-sm font-semibold tracking-wide text-gray-400 uppercase mb-3">Consistency Analytics (Last 30 Days)</h3>
+            <div id="heatmap" class="flex flex-wrap gap-1.5 justify-center p-2 bg-gray-900 rounded-lg border border-gray-850">
+                <!-- Javascript will generate cells dynamically representing data density -->
+            </div>
+            <div class="flex justify-between items-center mt-3 text-xxs text-gray-500 px-1">
+                <span>Less Study</span>
+                <div class="flex gap-1">
+                    <div class="heatmap-cell bg-gray-800"></div>
+                    <div class="heatmap-cell bg-orange-950"></div>
+                    <div class="heatmap-cell bg-orange-700"></div>
+                    <div class="heatmap-cell bg-orange-500"></div>
+                </div>
+                <span>Hardcore Focus</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Action Ribbon -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-ypt-card border-t border-gray-800 p-3 flex justify-around items-center max-w-md mx-auto shadow-2xl">
+        <button class="flex flex-col items-center text-red-500"><i class="fa-solid fa-stopwatch text-lg"></i><span class="text-xxs mt-1">Timer</span></button>
+        <button onclick="alert('Insights sync automatically based on your daily local stopwatch saves!')" class="flex flex-col items-center text-gray-500 hover:text-gray-300"><i class="fa-solid fa-chart-simple text-lg"></i><span class="text-xxs mt-1">Insights</span></button>
+        <button onclick="resetAllData()" class="flex flex-col items-center text-gray-600 hover:text-red-400"><i class="fa-solid fa-trash-can text-lg"></i><span class="text-xxs mt-1">Clear App</span></button>
+    </nav>
+
+    <!-- Core App Engine JavaScript Logic -->
+    <script>
+        // Reactive State Management Engine
+        let state = {
+            subjects: JSON.parse(localStorage.getItem('ypt_subjects')) || [
+                { id: 1, name: 'Mathematics', time: 0, color: 'bg-blue-600' },
+                { id: 2, name: 'Physics Science', time: 0, color: 'bg-purple-600' }
+            ],
+            todos: JSON.parse(localStorage.getItem('ypt_todos')) || [],
+            dday: JSON.parse(localStorage.getItem('ypt_dday')) || { name: 'Final Exam', date: '' },
+            history: JSON.parse(localStorage.getItem('ypt_history')) || {}, 
+            activeSubjectId: null
+        };
+
+        let timerInterval = null;
+
+        function saveState() {
+            localStorage.setItem('ypt_subjects', JSON.stringify(state.subjects));
+            localStorage.setItem('ypt_todos', JSON.stringify(state.todos));
+            localStorage.setItem('ypt_dday', JSON.stringify(state.dday));
+            localStorage.setItem('ypt_history', JSON.stringify(state.history));
+            updateGlobalUI();
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        // Timer Execution Controls
+        function toggleTimer(subjectId) {
+            const card = document.getElementById(`subject-${subjectId}`);
+            
+            if (state.activeSubjectId === subjectId) {
+                // Stop Current running timer
+                clearInterval(timerInterval);
+                state.activeSubjectId = null;
+                logToHistory();
+            } else {
+                // Stop any other running timer
+                if(state.activeSubjectId !== null) {
+                    clearInterval(timerInterval);
+                    logToHistory();
+                }
+                state.activeSubjectId = subjectId;
+                timerInterval = setInterval(() => {
+                    const subject = state.subjects.find(s => s.id === subjectId);
+                    if (subject) {
+                        subject.time++;
+                        document.getElementById(`time-${subjectId}`).innerText = formatTime(subject.time);
+                        saveState();
+                    }
+                }, 1000);
+            }
+            renderSubjects();
+        }
+
+        function logToHistory() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            let totalSecondsToday = state.subjects.reduce((acc, curr) => acc + curr.time, 0);
+            state.history[todayStr] = totalSecondsToday;
+            saveState();
+        }
+
+        // UI Injection Layer
+        function renderSubjects() {
+            const container = document.getElementById('subjects-container');
+            container.innerHTML = '';
+            state.subjects.forEach(subject => {
+                const isActive = state.activeSubjectId === subject.id;
+                container.innerHTML += `
+                    <div id="subject-${subject.id}" class="subject-card ${isActive ? 'active' : ''} bg-ypt-card p-4 rounded-xl border border-gray-800 flex justify-between items-center transition duration-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full ${subject.color || 'bg-red-500'}"></div>
+                            <div>
+                                <h4 class="font-bold text-gray-200">${subject.name}</h4>
+                                <span class="text-xs text-gray-500">Stopwatch Mode</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span id="time-${subject.id}" class="font-mono text-xl ${isActive ? 'text-red-400 font-bold' : 'text-gray-400'}">${formatTime(subject.time)}</span>
+                            <button onclick="toggleTimer(${subject.id})" class="p-3 rounded-full ${isActive ? 'bg-red-500 text-white' : 'bg-gray-800 text-gray-300'} w-12 h-12 flex items-center justify-center transition">
+                                <i class="fa-solid ${isActive ? 'fa-pause' : 'fa-play'}"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addSubject() {
+            const name = prompt("Enter Subject Name:");
+            if (!name) return;
+            const colors = ['bg-blue-600', 'bg-purple-600', 'bg-green-600', 'bg-yellow-600', 'bg-pink-600', 'bg-indigo-600'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            state.subjects.push({
+                id: Date.now(),
+                name: name,
+                time: 0,
+                color: randomColor
+            });
+            saveState();
+            renderSubjects();
+        }
+
+        // To-Do Logic
+        function renderTodos() {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = '';
+            state.todos.forEach((todo, idx) => {
+                list.innerHTML += `
+                    <li class="flex justify-between items-center bg-gray-900 px-3 py-2 rounded-lg border border-gray-850">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${idx})" class="accent-red-500">
+                            <span class="text-sm ${todo.completed ? 'line-through text-gray-600' : 'text-gray-300'}">${todo.text}</span>
+                        </div>
+                        <button onclick="deleteTodo(${idx})" class="text-gray-600 hover:text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </li>
+                `;
+            });
+        }
+
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            if (!input.value.trim()) return;
+            state.todos.push({ text: input.value.trim(), completed: false });
+            input.value = '';
+            saveState();
+            renderTodos();
+        }
+
+        function toggleTodo(index) {
+            state.todos[index].completed = !state.todos[index].completed;
+            saveState();
+            renderTodos();
+        }
+
+        function deleteTodo(index) {
+            state.todos.splice(index, 1);
+            saveState();
+            renderTodos();
+        }
+
+        // D-Day Configuration Engine
+        function setDDay() {
+            const name = prompt("What is the name of the milestone/exam?", state.dday.name);
+            const date = prompt("Enter Target Date (YYYY-MM-DD):", state.dday.date);
+            if(name && date) {
+                state.dday = { name, date };
+                saveState();
+                calculateDDay();
+            }
+        }
+
+        function calculateDDay() {
+            if (!state.dday.date) return;
+            const target = new Date(state.dday.date);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('target-exam-name').innerText = state.dday.name;
+            const targetDisplay = document.getElementById('target-days-left');
+            const topBarDisplay = document.getElementById('dday-display');
+            
+            if (diffDays > 0) {
+                targetDisplay.innerText = `D-${diffDays}`;
+                topBarDisplay.innerText = `${state.dday.name}: D-${diffDays}`;
+            } else if (diffDays === 0) {
+                targetDisplay.innerText = "D-Day!";
+                topBarDisplay.innerText = `${state.dday.name}: Today!`;
+            } else {
+                targetDisplay.innerText = `Passed`;
+                topBarDisplay.innerText = `Exam Finished`;
+            }
+        }
+
+        // YPT Micro Heatmap Visualization Generation
+        function renderHeatmap() {
+            const heatmap = document.getElementById('heatmap');
+            heatmap.innerHTML = '';
+            
+            // Loop historical index cells back 30 days
+            for(let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const secondsStudied = state.history[dateStr] || 0;
+                
+                let colorClass = 'bg-gray-800'; // No focus
+                if (secondsStudied > 0 && secondsStudied <= 3600) colorClass = 'bg-orange-950'; // <1 Hr
+                else if (secondsStudied > 3600 && secondsStudied <= 14400) colorClass = 'bg-orange-700'; // 1-4 Hrs
+                else if (secondsStudied > 14400) colorClass = 'bg-orange-500'; // Massive focus (>4 Hours)
+
+                heatmap.innerHTML += `<div class="heatmap-cell ${colorClass}" title="${dateStr}: ${formatTime(secondsStudied)} spent studying"></div>`;
+            }
+        }
+
+        function updateGlobalUI() {
+            const total = state.subjects.reduce((acc, curr) => acc + curr.time, 0);
+            document.getElementById('global-timer').innerText = `Total: ${formatTime(total)}`;
+        }
+
+        function resetAllData() {
+            if(confirm("Are you sure you want to reset all tracking elements, records, and planner indexes? This cannot be undone.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // App Initialization Sequence
+        window.onload = function() {
+            renderSubjects();
+            renderTodos();
+            calculateDDay();
+            renderHeatmap();
+            updateGlobalUI();
+        }
+    </script>
+</body>
+</html>
