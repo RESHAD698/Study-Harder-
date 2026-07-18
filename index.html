@@ -2,333 +2,413 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YPT Premium Studio</title>
-    <!-- Tailwind CSS Engine -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reshad's Focus Engine</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Library -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Animate.css for Premium Micro-Animations -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <!-- ApexCharts for Advanced Graphic Engine Analytics -->
+    <!-- ApexCharts for Advanced Analysis View -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- FullCalendar CSS & JS Engine -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <style>
-        body { background-color: #0b0b0d; font-family: 'Inter', sans-serif; }
-        .premium-card { background: rgba(26, 26, 30, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .subject-card.active-pulse { border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.25); animation: pulseBorder 2s infinite; }
-        @keyframes pulseBorder { 0%, 100% { border-color: rgba(239, 68, 68, 0.4); } 50% { border-color: rgba(239, 68, 68, 1); } }
-        /* Custom Scrollbar override */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #0b0b0d; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9px; }
+        body {
+            background-color: #050505;
+            color: #f4f4f5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Premium 60Hz Glassmorphism Base UI */
+        .glass-panel {
+            background: rgba(18, 18, 22, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+        }
+        /* Custom Glass Themes */
+        body.theme-crimson .theme-accent-text { color: #ef4444; }
+        body.theme-crimson .theme-accent-bg { background-color: #ef4444; }
+        body.theme-crimson .theme-accent-border { border-color: #ef4444; }
+        
+        body.theme-cyber .theme-accent-text { color: #06b6d4; }
+        body.theme-cyber .theme-accent-bg { background-color: #06b6d4; }
+        body.theme-cyber .theme-accent-border { border-color: #06b6d4; }
+
+        body.theme-emerald .theme-accent-text { color: #10b981; }
+        body.theme-emerald .theme-accent-bg { background-color: #10b981; }
+        body.theme-emerald .theme-accent-border { border-color: #10b981; }
+
+        /* Absolute Screen Blocker Lockout Overlay */
+        #focus-lockout-shield {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(3, 3, 5, 0.98);
+            backdrop-filter: blur(35px);
+            z-index: 99999;
+            touch-action: none; /* Stops native scrolling/gestures */
+        }
+        /* FullCalendar Custom Glass Tweak */
+        .fc { background: transparent; border: none; }
+        .fc-theme-standard td, .fc-theme-standard th { border: 1px solid rgba(255,255,255,0.05) !important; }
+        .fc-daygrid-day:hover { background: rgba(255,255,255,0.02); }
+        .fc .fc-button-primary { background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); }
+        .fc .fc-button-primary:hover { background-color: rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="text-gray-100 min-h-screen pb-24">
+<body class="theme-crimson min-h-screen pb-28">
 
-    <!-- Premium Glow Header -->
-    <header class="premium-card sticky top-0 z-50 px-4 py-3.5 border-b border-zinc-800/80 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="bg-red-500 text-white p-1.5 rounded-lg animate__animated animate__pulse animate__infinite">
-                <i class="fa-solid fa-fire-flame-curved text-sm"></i>
+    <!-- IMMERSIVE FOCUS SHIELD (BLOCKS THE SCREEN) -->
+    <div id="focus-lockout-shield" class="flex flex-col items-center justify-center p-6 text-center select-none">
+        <div class="absolute inset-0 bg-radial-gradient from-transparent via-black/50 to-black pointer-events-none"></div>
+        <div class="space-y-8 max-w-sm w-full z-10">
+            <div class="space-y-2">
+                <span class="text-xs tracking-widest uppercase text-zinc-500 font-bold">System Lockout Active</span>
+                <h2 id="locked-subject-title" class="text-3xl font-black tracking-tight text-white">Focus Module</h2>
+                <p class="text-xs text-zinc-400 px-4">Touch inputs shielded. Leaving or reloading this platform will disrupt your performance analytics metrics.</p>
             </div>
-            <h1 class="text-lg font-black tracking-tight text-white">YPT <span class="text-red-500 font-medium text-xs tracking-widest uppercase border border-red-500/30 px-1.5 py-0.5 rounded ml-1">PRO</span></h1>
+            
+            <!-- Absolute Timer Counter -->
+            <div class="py-10 border-y border-white/5 bg-white/[0.01] backdrop-blur-md rounded-2xl">
+                <span id="locked-stopwatch-display" class="font-mono text-5xl font-light tracking-normal text-white">00:00:00</span>
+            </div>
+
+            <button onclick="deactivateFocusShield()" class="w-full py-4 rounded-xl font-bold tracking-wide text-xs uppercase bg-white text-black hover:bg-zinc-200 active:scale-95 transition-all duration-200">
+                Break Lock & Save Session
+            </button>
         </div>
-        <div class="flex items-center gap-3">
-            <span id="dday-display" class="bg-zinc-900 text-zinc-400 px-3 py-1 rounded-full text-xs font-semibold border border-zinc-800">D-Day: Unset</span>
-            <span id="global-timer" class="text-base font-mono font-bold text-red-400 bg-red-950/30 px-3 py-1 rounded-full border border-red-900/40">Total: 00:00:00</span>
+    </div>
+
+    <!-- MAIN HEADER CONTROLLER -->
+    <header class="glass-panel sticky top-0 z-40 px-4 py-4 border-b border-white/[0.03] flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full theme-accent-bg animate-pulse"></div>
+            <h1 class="text-base font-black tracking-tight text-white uppercase">Reshad's <span class="theme-accent-text font-light tracking-wide">Timer</span></h1>
         </div>
+        <span id="global-counter" class="text-xs font-mono font-bold bg-white/[0.03] border border-white/[0.05] px-3 py-1.5 rounded-full text-zinc-300">Total Focus: 00:00:00</span>
     </header>
 
-    <!-- Main Engine Deck -->
+    <!-- CONTENT DISPLAY FRAME -->
     <main class="max-w-md mx-auto p-4 space-y-6">
-
-        <!-- ADVANCED TARGET DESK (D-DAY) -->
-        <section class="premium-card p-4 rounded-2xl animate__animated animate__fadeInDown">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Milestone Engine</span>
-                <button onclick="setDDay()" class="text-xs font-semibold text-red-400 hover:text-red-300 flex items-center gap-1 transition"><i class="fa-solid fa-pen-to-square"></i> Modify</button>
-            </div>
-            <div class="flex justify-between items-end">
-                <div>
-                    <h2 id="target-exam-name" class="text-base font-bold text-zinc-200">Set Core Exam Target</h2>
-                    <p class="text-xs text-zinc-500">Days remaining countdown metrics</p>
+        
+        <!-- DYNAMIC VIEWS CONTAINER -->
+        <div id="view-timer" class="app-view space-y-6">
+            <!-- Subject Selection Grid -->
+            <section class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Focus Blueprints</span>
+                    <button onclick="createNewSubject()" class="text-xs font-bold theme-accent-text flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> New Module</button>
                 </div>
-                <span id="target-days-left" class="text-3xl font-black text-white bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">D-0</span>
-            </div>
-        </section>
+                <div id="subjects-grid" class="space-y-2.5"></div>
+            </section>
+        </div>
 
-        <!-- SUBJECT STOPWATCH CORE -->
-        <section class="space-y-3">
-            <div class="flex justify-between items-center px-1">
-                <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Focus Modules</span>
-                <button onclick="addSubject()" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-circle-plus text-red-400"></i> Add Module</button>
+        <div id="view-calendar" class="app-view hidden space-y-4">
+            <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Milestone Target Planner</span>
+            <div class="glass-panel p-3 rounded-2xl">
+                <div id="calendar-element"></div>
             </div>
-            <div id="subjects-container" class="space-y-3"></div>
-        </section>
+        </div>
 
-        <!-- 10-MIN PLANNERS & TASKS -->
-        <section class="premium-card p-4 rounded-2xl space-y-3">
-            <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Premium Focus Tasks</span>
+        <div id="view-analysis" class="app-view hidden space-y-6">
+            <section class="glass-panel p-4 rounded-2xl space-y-4">
+                <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Metric Insights Dashboard</span>
+                <div id="analytics-vector-chart"></div>
+            </section>
+        </div>
+
+        <div id="view-todo" class="app-view hidden space-y-4">
+            <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Core Task Framework</span>
             <div class="flex gap-2">
-                <input type="text" id="todo-input" placeholder="What will you conquer next?" class="flex-1 bg-zinc-900/90 border border-zinc-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-red-500 text-zinc-200 placeholder-zinc-600 transition">
-                <button onclick="addTodo()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-4 rounded-xl text-sm transition shadow-lg shadow-red-500/20"><i class="fa-solid fa-arrow-right"></i></button>
+                <input type="text" id="todo-input-field" placeholder="Add upcoming checkpoint..." class="flex-1 bg-zinc-900 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-zinc-700 text-zinc-200">
+                <button onclick="commitTodoItem()" class="theme-accent-bg text-black font-bold px-5 rounded-xl text-sm transition"><i class="fa-solid fa-plus"></i></button>
             </div>
-            <ul id="todo-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></ul>
-        </section>
+            <ul id="todo-list-wrapper" class="space-y-2"></ul>
+        </div>
 
-        <!-- HIGH FIDELITY ANALYTICS DECK -->
-        <section class="premium-card p-4 rounded-2xl space-y-2">
-            <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Performance Metrics Engine</span>
-            <div id="analytics-chart" class="w-full bg-zinc-900/40 rounded-xl border border-zinc-800/60 p-1"></div>
-        </section>
+        <div id="view-themes" class="app-view hidden space-y-4">
+            <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Interface Cosmetics</span>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="switchTheme('theme-crimson')" class="glass-panel p-4 rounded-xl border border-red-500/20 text-center text-xs font-medium text-red-400">Crimson Red</button>
+                <button onclick="switchTheme('theme-cyber')" class="glass-panel p-4 rounded-xl border border-cyan-500/20 text-center text-xs font-medium text-cyan-400">Cyber Cyan</button>
+                <button onclick="switchTheme('theme-emerald')" class="glass-panel p-4 rounded-xl border border-emerald-500/20 text-center text-xs font-medium text-emerald-400">Emerald Mint</button>
+            </div>
+        </div>
+
+        <div id="view-premium" class="app-view hidden space-y-6">
+            <section class="glass-panel p-5 rounded-3xl border border-yellow-500/20 space-y-4 relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-24 height-24 bg-yellow-500/10 rounded-full blur-2xl"></div>
+                <span class="text-[10px] font-black tracking-widest text-yellow-500 uppercase border border-yellow-500/30 px-2 py-0.5 rounded-md">Elite tier Access</span>
+                <h3 class="text-2xl font-black text-white">Unlock Developer Support Plan</h3>
+                <p class="text-xs text-zinc-400 leading-relaxed">Gain synchronization options, custom styling access, and priority platform updates by supporting the core developer network.</p>
+                <button onclick="alert('Support channel integration coming soon!')" class="w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-black rounded-xl text-xs font-bold tracking-wider uppercase shadow-lg shadow-yellow-500/10">Become a Patron</button>
+            </section>
+
+            <!-- FEEDBACK AND COMMENTS LAYER -->
+            <section class="glass-panel p-4 rounded-2xl space-y-4">
+                <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase block">Terminal Comments</span>
+                <div class="flex gap-2">
+                    <input type="text" id="comment-input" placeholder="Leave a thought or feedback..." class="flex-1 bg-zinc-900 border border-white/5 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-zinc-700">
+                    <button onclick="postComment()" class="bg-zinc-800 text-zinc-200 text-xs px-4 rounded-xl font-bold">Post</button>
+                </div>
+                <div id="comments-container" class="space-y-2.5 max-h-40 overflow-y-auto pt-1"></div>
+            </section>
+        </div>
 
     </main>
 
-    <!-- Navigation Deck -->
-    <nav class="fixed bottom-4 left-4 right-4 premium-card border border-zinc-800/60 p-2.5 rounded-2xl flex justify-around items-center max-w-md mx-auto shadow-2xl z-50">
-        <button class="flex flex-col items-center text-red-500 transition"><i class="fa-solid fa-circle-dot text-lg"></i><span class="text-[10px] font-bold mt-1">Console</span></button>
-        <button onclick="resetAllData()" class="flex flex-col items-center text-zinc-600 hover:text-red-400 transition"><i class="fa-solid fa-rotate-left text-lg"></i><span class="text-[10px] font-bold mt-1">Purge Cache</span></button>
+    <!-- FLOATING GLASS CONTROLLER NAVIGATION DOCK -->
+    <nav class="fixed bottom-4 left-4 right-4 glass-panel p-2 rounded-2xl flex justify-between items-center max-w-md mx-auto shadow-2xl z-40">
+        <button onclick="navigateTo('view-timer')" class="nav-btn flex flex-col items-center flex-1 py-1.5 theme-accent-text"><i class="fa-solid fa-stopwatch text-base"></i><span class="text-[9px] font-bold mt-1">Timer</span></button>
+        <button onclick="navigateTo('view-calendar')" class="nav-btn flex flex-col items-center flex-1 py-1.5 text-zinc-500"><i class="fa-solid fa-calendar-days text-base"></i><span class="text-[9px] font-bold mt-1">Calendar</span></button>
+        <button onclick="navigateTo('view-analysis')" class="nav-btn flex flex-col items-center flex-1 py-1.5 text-zinc-500"><i class="fa-solid fa-chart-line text-base"></i><span class="text-[9px] font-bold mt-1">Metrics</span></button>
+        <button onclick="navigateTo('view-todo')" class="nav-btn flex flex-col items-center flex-1 py-1.5 text-zinc-500"><i class="fa-solid fa-list-check text-base"></i><span class="text-[9px] font-bold mt-1">Tasks</span></button>
+        <button onclick="navigateTo('view-themes')" class="nav-btn flex flex-col items-center flex-1 py-1.5 text-zinc-500"><i class="fa-solid fa-palette text-base"></i><span class="text-[9px] font-bold mt-1">Themes</span></button>
+        <button onclick="navigateTo('view-premium')" class="nav-btn flex flex-col items-center flex-1 py-1.5 text-zinc-500"><i class="fa-solid fa-crown text-base"></i><span class="text-[9px] font-bold mt-1">Elite</span></button>
     </nav>
 
+    <!-- CORE PLATFORM JAVASCRIPT LOGIC -->
     <script>
-        // Internal Global State Register
-        let state = {
-            subjects: JSON.parse(localStorage.getItem('ypt_premium_subjects')) || [
-                { id: 1, name: 'Mathematics Core', time: 0, color: '#3b82f6' },
-                { id: 2, name: 'Advanced Physics', time: 0, color: '#a855f7' }
+        let appState = {
+            modules: JSON.parse(localStorage.getItem('reshad_modules')) || [
+                { id: 1, name: 'HSC Core Mathematics', time: 0 },
+                { id: 2, name: 'Advanced Physics Engine', time: 0 }
             ],
-            todos: JSON.parse(localStorage.getItem('ypt_premium_todos')) || [],
-            dday: JSON.parse(localStorage.getItem('ypt_premium_dday')) || { name: 'Final Exam', date: '' },
-            history: JSON.parse(localStorage.getItem('ypt_premium_history')) || {},
-            activeSubjectId: null
+            tasks: JSON.parse(localStorage.getItem('reshad_tasks')) || [],
+            comments: JSON.parse(localStorage.getItem('reshad_comments')) || [
+                { text: "Loving the clean 60Hz flow, Reshad! Perfect setup.", date: "Today" }
+            ],
+            historyLog: JSON.parse(localStorage.getItem('reshad_history')) || {},
+            activeTheme: localStorage.getItem('reshad_theme') || 'theme-crimson',
+            activeModuleId: null
         };
 
-        let activeTimerInterval = null;
-        let apexChartInstance = null;
+        let primaryTimerInterval = null;
+        let chartEngineInstance = null;
+        let calendarEngineInstance = null;
 
-        function saveState() {
-            localStorage.setItem('ypt_premium_subjects', JSON.stringify(state.subjects));
-            localStorage.setItem('ypt_premium_todos', JSON.stringify(state.todos));
-            localStorage.setItem('ypt_premium_dday', JSON.stringify(state.dday));
-            localStorage.setItem('ypt_premium_history', JSON.stringify(state.history));
-            updateGlobalMetrics();
+        function saveAppState() {
+            localStorage.setItem('reshad_modules', JSON.stringify(appState.modules));
+            localStorage.setItem('reshad_tasks', JSON.stringify(appState.tasks));
+            localStorage.setItem('reshad_comments', JSON.stringify(appState.comments));
+            localStorage.setItem('reshad_history', JSON.stringify(appState.historyLog));
+            localStorage.setItem('reshad_theme', appState.activeTheme);
+            refreshGlobalCounters();
         }
 
-        function formatTime(secs) {
-            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
-            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
-            const s = (secs % 60).toString().padStart(2, '0');
+        function formatSeconds(totalSecs) {
+            const h = Math.floor(totalSecs / 3600).toString().padStart(2, '0');
+            const m = Math.floor((totalSecs % 3600) / 60).toString().padStart(2, '0');
+            const s = (totalSecs % 60).toString().padStart(2, '0');
             return `${h}:${m}:${s}`;
         }
 
-        // Modular Timer Control System
-        function toggleTimer(id) {
-            const element = document.getElementById(`subject-${id}`);
-            
-            if (state.activeSubjectId === id) {
-                // Trigger exit animation sequence execution
-                element.classList.remove('active-pulse');
-                clearInterval(activeTimerInterval);
-                state.activeSubjectId = null;
-                commitHistoryLog();
-            } else {
-                if (state.activeSubjectId !== null) {
-                    document.getElementById(`subject-${state.activeSubjectId}`).classList.remove('active-pulse');
-                    clearInterval(activeTimerInterval);
-                    commitHistoryLog();
-                }
-                state.activeSubjectId = id;
-                element.classList.add('active-pulse');
-                
-                activeTimerInterval = setInterval(() => {
-                    const targetSub = state.subjects.find(s => s.id === id);
-                    if (targetSub) {
-                        targetSub.time++;
-                        document.getElementById(`time-${id}`).innerText = formatTime(targetSub.time);
-                        saveState();
-                    }
-                }, 1000);
+        // UNREFRESHABLE SCREEN PROTECTION LOGIC
+        window.addEventListener('beforeunload', function (e) {
+            if (appState.activeModuleId !== null) {
+                e.preventDefault();
+                e.returnValue = 'Focus session active! Leaving will cause current timer data loss.';
             }
-            renderSubjects();
+        });
+
+        function activateFocusShield(moduleId) {
+            appState.activeModuleId = moduleId;
+            const targetSub = appState.modules.find(m => m.id === moduleId);
+            
+            document.getElementById('locked-subject-title').innerText = targetSub.name;
+            document.getElementById('focus-lockout-shield').style.display = 'flex';
+            
+            // Lock out default touch drag events completely
+            document.body.style.overflow = 'hidden';
+
+            primaryTimerInterval = setInterval(() => {
+                targetSub.time++;
+                document.getElementById('locked-stopwatch-display').innerText = formatSeconds(targetSub.time);
+                saveAppState();
+            }, 1000);
         }
 
-        function commitHistoryLog() {
+        function deactivateFocusShield() {
+            clearInterval(primaryTimerInterval);
             const todayKey = new Date().toISOString().split('T')[0];
-            let aggregateTime = state.subjects.reduce((acc, c) => acc + c.time, 0);
-            state.history[todayKey] = Math.round(aggregateTime / 60); // Log metric in minutes
-            saveState();
-            refreshAnalyticsChart();
+            let rawSum = appState.modules.reduce((acc, c) => acc + c.time, 0);
+            appState.historyLog[todayKey] = Math.round(rawSum / 60); // Save in minutes
+            
+            appState.activeModuleId = null;
+            document.getElementById('focus-lockout-shield').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            saveAppState();
+            renderModules();
+            if(chartEngineInstance) rebuildAnalyticsChart();
         }
 
-        // DOM Render Execution Layer
-        function renderSubjects() {
-            const container = document.getElementById('subjects-container');
-            container.innerHTML = '';
-            state.subjects.forEach(sub => {
-                const isActive = state.activeSubjectId === sub.id;
-                container.innerHTML += `
-                    <div id="subject-${sub.id}" class="subject-card ${isActive ? 'active-pulse' : ''} premium-card p-4 rounded-2xl flex justify-between items-center transition-all duration-300 animate__animated animate__fadeInUp">
-                        <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full" style="background-color: ${sub.color}"></div>
-                            <div>
-                                <h4 class="font-bold text-sm tracking-wide text-zinc-100">${sub.name}</h4>
-                                <span class="text-[11px] text-zinc-500 font-medium">Stopwatch Module Active</span>
-                            </div>
+        // NAVIGATION ARCHITECTURE
+        function navigateTo(targetViewId) {
+            document.querySelectorAll('.app-view').forEach(view => view.classList.add('hidden'));
+            document.getElementById(targetViewId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('theme-accent-text'));
+            event.currentTarget.classList.add('theme-accent-text');
+
+            if (targetViewId === 'view-calendar') {
+                setTimeout(() => { initCalendarModule(); }, 50);
+            } else if (targetViewId === 'view-analysis') {
+                setTimeout(() => { rebuildAnalyticsChart(); }, 50);
+            }
+        }
+
+        // ENGINE COMPONENT ACTIONS
+        function renderModules() {
+            const grid = document.getElementById('subjects-grid');
+            grid.innerHTML = '';
+            appState.modules.forEach(mod => {
+                grid.innerHTML += `
+                    <div class="glass-panel p-4 rounded-2xl flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-sm text-zinc-200">${mod.name}</h4>
+                            <span class="text-[10px] text-zinc-500 font-mono">${formatSeconds(mod.time)} Logged</span>
                         </div>
-                        <div class="flex items-center gap-3.5">
-                            <span id="time-${sub.id}" class="font-mono text-xl font-medium tracking-tight ${isActive ? 'text-red-400 font-bold' : 'text-zinc-400'}">${formatTime(sub.time)}</span>
-                            <button onclick="toggleTimer(${sub.id})" class="w-11 h-11 rounded-xl flex items-center justify-center transition dynamic-action shadow-lg ${isActive ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}">
-                                <i class="fa-solid ${isActive ? 'fa-pause' : 'fa-play'} text-sm"></i>
-                            </button>
-                        </div>
+                        <button onclick="activateFocusShield(${mod.id})" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.02] border border-white/5 text-zinc-300 hover:border-zinc-700 transition">
+                            <i class="fa-solid fa-play text-xs"></i>
+                        </button>
                     </div>
                 `;
             });
         }
 
-        function addSubject() {
-            const name = prompt("Enter New Subject Title:");
+        function createNewSubject() {
+            const name = prompt("Enter Module Name:");
             if (!name) return;
-            const hexArray = ['#3b82f6', '#a855f7', '#10b981', '#f59e0b', '#ec4899', '#6366f1'];
-            const assignedColor = hexArray[Math.floor(Math.random() * hexArray.length)];
-            
-            state.subjects.push({
-                id: Date.now(),
-                name: name,
-                time: 0,
-                color: assignedColor
-            });
-            saveState();
-            renderSubjects();
+            appState.modules.push({ id: Date.now(), name: name, time: 0 });
+            saveAppState();
+            renderModules();
         }
 
-        // Tasks / To-Dos Layout Logic
-        function renderTodos() {
-            const list = document.getElementById('todo-list');
+        // TASK ACTIONS
+        function renderTodoFramework() {
+            const list = document.getElementById('todo-list-wrapper');
             list.innerHTML = '';
-            state.todos.forEach((todo, index) => {
+            appState.tasks.forEach((task, index) => {
                 list.innerHTML += `
-                    <li class="flex justify-between items-center bg-zinc-900/60 px-3.5 py-2.5 rounded-xl border border-zinc-800/80 animate__animated animate__fadeIn text-sm">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})" class="w-4 h-4 accent-red-500 bg-zinc-800 border-zinc-700 rounded focus:ring-0">
-                            <span class="${todo.completed ? 'line-through text-zinc-600' : 'text-zinc-300'} font-medium transition-all">${todo.text}</span>
-                        </div>
-                        <button onclick="deleteTodo(${index})" class="text-zinc-600 hover:text-red-400 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    <li class="glass-panel px-4 py-3 rounded-xl flex justify-between items-center text-xs">
+                        <span class="${task.done ? 'line-through text-zinc-600' : 'text-zinc-300'} font-medium">${task.text}</span>
+                        <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTaskFlag(${index})" class="accent-zinc-500">
                     </li>
                 `;
             });
         }
 
-        function addTodo() {
-            const input = document.getElementById('todo-input');
-            if (!input.value.trim()) return;
-            state.todos.push({ text: input.value.trim(), completed: false });
-            input.value = '';
-            saveState();
-            renderTodos();
+        function commitTodoItem() {
+            const el = document.getElementById('todo-input-field');
+            if(!el.value.trim()) return;
+            appState.tasks.push({ text: el.value.trim(), done: false });
+            el.value = '';
+            saveAppState();
+            renderTodoFramework();
         }
 
-        function toggleTodo(index) {
-            state.todos[index].completed = !state.todos[index].completed;
-            saveState();
-            renderTodos();
+        function toggleTaskFlag(index) {
+            appState.tasks[index].done = !appState.tasks[index].done;
+            saveAppState();
+            renderTodoFramework();
         }
 
-        function deleteTodo(index) {
-            state.todos.splice(index, 1);
-            saveState();
-            renderTodos();
+        // THEMES ENGINE
+        function switchTheme(className) {
+            document.body.className = className + " min-h-screen pb-28";
+            appState.activeTheme = className;
+            saveAppState();
         }
 
-        // Milestone Engine Calculation Loop
-        function setDDay() {
-            const name = prompt("Enter Target Milestone Descriptor:", state.dday.name);
-            const date = prompt("Enter Targeted Calendar Marker (YYYY-MM-DD):", state.dday.date);
-            if (name && date) {
-                state.dday = { name, date };
-                saveState();
-                calculateDDayMetric();
-            }
+        // COMMENTS ACTIONS
+        function renderCommentsTerminal() {
+            const container = document.getElementById('comments-container');
+            container.innerHTML = '';
+            appState.comments.forEach(c => {
+                container.innerHTML += `
+                    <div class="bg-white/[0.01] border border-white/[0.03] p-2.5 rounded-xl text-[11px] leading-relaxed">
+                        <span class="text-zinc-500 font-mono block text-[9px] mb-0.5">${c.date}</span>
+                        <p class="text-zinc-300">${c.text}</p>
+                    </div>
+                `;
+            });
         }
 
-        function calculateDDayMetric() {
-            if (!state.dday.date) return;
-            const target = new Date(state.dday.date);
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const calculationGap = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+        function postComment() {
+            const el = document.getElementById('comment-input');
+            if(!el.value.trim()) return;
+            appState.comments.unshift({ text: el.value.trim(), date: new Date().toLocaleDateString() });
+            el.value = '';
+            saveAppState();
+            renderCommentsTerminal();
+        }
+
+        // FULLCALENDAR PLATFORM SYSTEM
+        function initCalendarModule() {
+            const container = document.getElementById('calendar-element');
+            if(calendarEngineInstance) calendarEngineInstance.destroy();
             
-            document.getElementById('target-exam-name').innerText = state.dday.name;
-            const marker = document.getElementById('target-days-left');
-            const headerMarker = document.getElementById('dday-display');
-            
-            if (calculationGap > 0) {
-                marker.innerText = `D-${calculationGap}`;
-                headerMarker.innerText = `D-${calculationGap}`;
-            } else if (calculationGap === 0) {
-                marker.innerText = "D-Day";
-                headerMarker.innerText = "D-Day Now";
-            } else {
-                marker.innerText = "Passed";
-                headerMarker.innerText = "Complete";
-            }
+            calendarEngineInstance = new FullCalendar.Calendar(container, {
+                initialView: 'dayGridMonth',
+                headerToolbar: { left: 'prev', center: 'title', right: 'next' },
+                themeSystem: 'standard',
+                height: 340,
+                dateClick: function(info) {
+                    const milestone = prompt(`Set target milestone note for ${info.dateStr}:`);
+                    if(milestone) {
+                        calendarEngineInstance.addEvent({ title: milestone, start: info.dateStr, allDay: true });
+                    }
+                }
+            });
+            calendarEngineInstance.render();
         }
 
-        // ApexCharts Vector Rendering Analytics Engine
-        function refreshAnalyticsChart() {
-            const generatedCategories = [];
-            const absoluteSeriesData = [];
-            
-            for(let i = 6; i >= 0; i--) {
-                const targetDay = new Date();
-                targetDay.setDate(targetDay.getDate() - i);
-                const stringFormat = targetDay.toISOString().split('T')[0];
-                
-                // Read date maps
-                generatedCategories.push(targetDay.toLocaleDateString('en-US', { weekday: 'short' }));
-                absoluteSeriesData.push(state.history[stringFormat] || 0); 
+        // APEXCHARTS PLOTTING ENGINE
+        function rebuildAnalyticsChart() {
+            const days = []; const dataPoints = [];
+            for(let i = 4; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const str = d.toISOString().split('T')[0];
+                days.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+                dataPoints.push(appState.historyLog[str] || 0);
             }
 
-            const configurations = {
-                chart: { type: 'area', height: 160, toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-                colors: ['#ef4444'],
-                stroke: { width: 3, curve: 'smooth' },
-                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0, stops: [0, 90, 100] } },
+            const chartOptions = {
+                chart: { type: 'area', height: 160, toolbar: { show: false } },
+                colors: [appState.activeTheme === 'theme-cyber' ? '#06b6d4' : appState.activeTheme === 'theme-emerald' ? '#10b981' : '#ef4444'],
+                stroke: { width: 2, curve: 'straight' },
+                fill: { type: 'solid', opacity: 0.05 },
                 dataLabels: { enabled: false },
-                grid: { show: true, borderColor: '#1f1f23', strokeDashArray: 4 },
-                series: [{ name: 'Study Focus (Minutes)', data: absoluteSeriesData }],
-                xaxis: { categories: generatedCategories, labels: { style: { colors: '#71717a', fontSize: '10px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-                yaxis: { labels: { style: { colors: '#71717a', fontSize: '10px' } } },
+                grid: { borderColor: '#16161a', strokeDashArray: 3 },
+                series: [{ name: 'Focus (Mins)', data: dataPoints }],
+                xaxis: { categories: days, labels: { style: { colors: '#52525b', fontSize: '10px' } } },
+                yaxis: { labels: { style: { colors: '#52525b', fontSize: '10px' } } },
                 tooltip: { theme: 'dark' }
             };
 
-            if (apexChartInstance) {
-                apexChartInstance.updateOptions(configurations);
-            } else {
-                apexChartInstance = new ApexCharts(document.querySelector("#analytics-chart"), configurations);
-                apexChartInstance.render();
-            }
+            if(chartEngineInstance) chartEngineInstance.destroy();
+            chartEngineInstance = new ApexCharts(document.querySelector("#analytics-vector-chart"), chartOptions);
+            chartEngineInstance.render();
         }
 
-        function updateGlobalMetrics() {
-            const sumTotal = state.subjects.reduce((acc, c) => acc + c.time, 0);
-            document.getElementById('global-timer').innerText = `Total: ${formatTime(sumTotal)}`;
+        function refreshGlobalCounters() {
+            const sum = appState.modules.reduce((acc, c) => acc + c.time, 0);
+            document.getElementById('global-counter').innerText = `Total Focus: ${formatSeconds(sum)}`;
         }
 
-        function resetAllData() {
-            if(confirm("Confirm action? This will clear local data logs completely.")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        // System Core Init
+        // MAIN INITIALIZE SEQUENCER
         window.onload = function() {
-            renderSubjects();
-            renderTodos();
-            calculateDDayMetric();
-            updateGlobalMetrics();
-            refreshAnalyticsChart();
+            switchTheme(appState.activeTheme);
+            renderModules();
+            renderTodoFramework();
+            renderCommentsTerminal();
+            refreshGlobalCounters();
         }
     </script>
 </body>
